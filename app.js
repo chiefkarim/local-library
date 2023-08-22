@@ -4,6 +4,9 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 require('dotenv').config()
+const compression = require("compression");
+const helmet = require("helmet");
+const RateLimit = require("express-rate-limit");
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
@@ -13,7 +16,12 @@ const app = express();
 //setting up mongoose to not show warnings 
 
 //connecting to mongoDB database
-
+const limiter = RateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 20,
+});
+// Apply rate limiter to all requests
+app.use(limiter);
 
 // View engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -23,6 +31,14 @@ app.set("view engine", "pug");
 const mongoDB = process.env.DATABASE_URL
 const mongoose = require("mongoose");
 mongoose.set("strictQuery", false);
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      "script-src": ["'self'", "code.jquery.com", "cdn.jsdelivr.net"],
+    },
+  }),
+);
+app.use(compression()); // Compress all routes
 
 app.use((req, res, next) => {
   console.log('Time:', Date.now())
