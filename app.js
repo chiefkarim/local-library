@@ -3,10 +3,11 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
-
+require('dotenv').config()
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
+const catalogRouter = require('./routes/catalog')
 
 const app = express();
 //setting up mongoose to not show warnings 
@@ -14,15 +15,24 @@ const app = express();
 //connecting to mongoDB database
 
 
-// view engine setup
+// View engine setup
 app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "ejs");
-const mongoDB = 'mongodb+srv://myAtlasDBUser:d9iO6UECAVrbhld7@myatlasclusteredu.w9k970n.mongodb.net/local_library?retryWrites=true&w=majority'
+app.set("view engine", "pug");
+
+//setting up database connection
+const mongoDB = process.env.DATABASE_URL
+const mongoose = require("mongoose");
+mongoose.set("strictQuery", false);
 
 app.use((req, res, next) => {
   console.log('Time:', Date.now())
   next()
 })
+main().catch((err) => console.log(err));
+async function main() {
+  await mongoose.connect(mongoDB);
+}
+
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -31,6 +41,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/catalog", catalogRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

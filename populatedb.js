@@ -28,12 +28,12 @@ async function main() {
   console.log("Debug: About to connect");
   await mongoose.connect(mongoDB);
   console.log("Debug: Should be connected?");
-//  await createGenres();
+ await createGenres();
 const books=await Book.find()
 console.log(books)
-// await createAuthors();
-//  await createBooks();
-  //await createBookInstances();
+await createAuthors();
+ await createBooks();
+await createBookInstances();
   console.log("Debug: Closing mongoose");
   mongoose.connection.close();
 }
